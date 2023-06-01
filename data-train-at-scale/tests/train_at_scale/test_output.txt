@@ -1,0 +1,392 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.12, pytest-7.3.1, pluggy-1.0.0 -- /home/alexandre/.pyenv/versions/3.8.12/envs/taxifare-env/bin/python3.8
+cachedir: .pytest_cache
+rootdir: /home/alexandre/code/lewagon/data-train-at-scale/tests
+configfile: pytest_kitt.ini
+collecting ... collected 8 items
+
+tests/train_at_scale/test_clean.py::test_clean_data PASSED               [ 12%]
+tests/train_at_scale/test_main_local.py::TestMainLocal::test_route_preprocess_and_train FAILED [ 25%]
+tests/train_at_scale/test_main_local.py::TestMainLocal::test_route_pred PASSED [ 37%]
+tests/train_at_scale/test_main_local.py::TestMainLocal::test_route_preprocess FAILED [ 50%]
+tests/train_at_scale/test_main_local.py::TestMainLocal::test_route_train PASSED [ 62%]
+tests/train_at_scale/test_model.py::test_model_can_fit PASSED            [ 75%]
+tests/train_at_scale/test_notebook.py::TestNotebook::test_y_pred PASSED  [ 87%]
+tests/train_at_scale/test_processor_pipeline.py::test_preprocess_features PASSED [100%]
+
+=================================== FAILURES ===================================
+________________ TestMainLocal.test_route_preprocess_and_train _________________
+
+self = <tests.train_at_scale.test_main_local.TestMainLocal object at 0x7f393e2a8370>
+
+    def test_route_preprocess_and_train(self):
+    
+        # 1) SETUP
+        data_query_path = Path(LOCAL_DATA_PATH).joinpath("raw",f"query_{MIN_DATE}_{MAX_DATE}_{DATA_SIZE}.csv")
+        data_query_exists = data_query_path.is_file()
+    
+        if data_query_exists:
+            # We start from a blank state. No cached files
+            shutil.copyfile(data_query_path, f'{data_query_path}_backup')
+            data_query_path.unlink()
+    
+        # 2) ACT
+        from taxifare.interface.main_local import preprocess_and_train
+    
+        # Check route runs correctly
+>       preprocess_and_train(min_date=MIN_DATE, max_date=MAX_DATE)
+
+tests/train_at_scale/test_main_local.py:36: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+taxifare/interface/main_local.py:53: in preprocess_and_train
+    query_job = client.query(query)
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/client.py:3403: in query
+    return _job_helpers.query_jobs_insert(
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/_job_helpers.py:114: in query_jobs_insert
+    future = do_query()
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/_job_helpers.py:91: in do_query
+    query_job._begin(retry=retry, timeout=timeout)
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/job/query.py:1310: in _begin
+    super(QueryJob, self)._begin(client=client, retry=retry, timeout=timeout)
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/job/base.py:693: in _begin
+    api_response = client._call_api(
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/client.py:813: in _call_api
+    return call()
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/api_core/retry.py:349: in retry_wrapped_func
+    return retry_target(
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/api_core/retry.py:191: in retry_target
+    return target()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <google.cloud.bigquery._http.Connection object at 0x7f393e1aefd0>
+method = 'POST', path = '/projects/<your project id>/jobs', query_params = None
+data = '{"jobReference": {"jobId": "17eef879-279c-47aa-a163-e78b9c025816", "projectId": "<your project id>"}, "configuration"...     WHERE pickup_datetime BETWEEN \'2009-01-01\' AND \'2015-01-01\'\\n        ORDER BY pickup_datetime\\n        "}}}'
+content_type = 'application/json', headers = None, api_base_url = None
+api_version = None, expect_json = True, _target_object = None, timeout = None
+extra_api_info = None
+
+    def api_request(
+        self,
+        method,
+        path,
+        query_params=None,
+        data=None,
+        content_type=None,
+        headers=None,
+        api_base_url=None,
+        api_version=None,
+        expect_json=True,
+        _target_object=None,
+        timeout=_DEFAULT_TIMEOUT,
+        extra_api_info=None,
+    ):
+        """Make a request over the HTTP transport to the API.
+    
+        You shouldn't need to use this method, but if you plan to
+        interact with the API using these primitives, this is the
+        correct one to use.
+    
+        :type method: str
+        :param method: The HTTP method name (ie, ``GET``, ``POST``, etc).
+                       Required.
+    
+        :type path: str
+        :param path: The path to the resource (ie, ``'/b/bucket-name'``).
+                     Required.
+    
+        :type query_params: dict or list
+        :param query_params: A dictionary of keys and values (or list of
+                             key-value pairs) to insert into the query
+                             string of the URL.
+    
+        :type data: str
+        :param data: The data to send as the body of the request. Default is
+                     the empty string.
+    
+        :type content_type: str
+        :param content_type: The proper MIME type of the data provided. Default
+                             is None.
+    
+        :type headers: dict
+        :param headers: extra HTTP headers to be sent with the request.
+    
+        :type api_base_url: str
+        :param api_base_url: The base URL for the API endpoint.
+                             Typically you won't have to provide this.
+                             Default is the standard API base URL.
+    
+        :type api_version: str
+        :param api_version: The version of the API to call.  Typically
+                            you shouldn't provide this and instead use
+                            the default for the library.  Default is the
+                            latest API version supported by
+                            google-cloud-python.
+    
+        :type expect_json: bool
+        :param expect_json: If True, this method will try to parse the
+                            response as JSON and raise an exception if
+                            that cannot be done.  Default is True.
+    
+        :type _target_object: :class:`object`
+        :param _target_object:
+            (Optional) Protected argument to be used by library callers. This
+            can allow custom behavior, for example, to defer an HTTP request
+            and complete initialization of the object at a later time.
+    
+        :type timeout: float or tuple
+        :param timeout: (optional) The amount of time, in seconds, to wait
+            for the server response.
+    
+            Can also be passed as a tuple (connect_timeout, read_timeout).
+            See :meth:`requests.Session.request` documentation for details.
+    
+        :type extra_api_info: string
+        :param extra_api_info: (optional) Extra api info to be appended to
+            the X-Goog-API-Client header
+    
+        :raises ~google.cloud.exceptions.GoogleCloudError: if the response code
+            is not 200 OK.
+        :raises ValueError: if the response content type is not JSON.
+        :rtype: dict or str
+        :returns: The API response payload, either as a raw string or
+                  a dictionary if the response is valid JSON.
+        """
+        url = self.build_api_url(
+            path=path,
+            query_params=query_params,
+            api_base_url=api_base_url,
+            api_version=api_version,
+        )
+    
+        # Making the executive decision that any dictionary
+        # data will be sent properly as JSON.
+        if data and isinstance(data, dict):
+            data = json.dumps(data)
+            content_type = "application/json"
+    
+        response = self._make_request(
+            method=method,
+            url=url,
+            data=data,
+            content_type=content_type,
+            headers=headers,
+            target_object=_target_object,
+            timeout=timeout,
+            extra_api_info=extra_api_info,
+        )
+    
+        if not 200 <= response.status_code < 300:
+>           raise exceptions.from_http_response(response)
+E           google.api_core.exceptions.BadRequest: 400 POST https://bigquery.googleapis.com/bigquery/v2/projects/%3Cyour%20project%20id%3E/jobs?prettyPrint=false: ProjectId and DatasetId must be non-empty
+E           
+E           Location: None
+E           Job ID: 17eef879-279c-47aa-a163-e78b9c025816
+
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/_http/__init__.py:494: BadRequest
+----------------------------- Captured stdout call -----------------------------
+[34m
+Loading TensorFlow...[0m
+
+✅ TensorFlow loaded (0.0s)
+[35m
+ ⭐️ Use case: preprocess_and_train[0m
+Loading data from Querying Big Query server...
+----------------------------- Captured stderr call -----------------------------
+2023-05-31 23:19:49.611648: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-05-31 23:19:49.718233: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2023-05-31 23:19:49.718263: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2023-05-31 23:19:49.743270: E tensorflow/stream_executor/cuda/cuda_blas.cc:2981] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2023-05-31 23:19:50.358752: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory
+2023-05-31 23:19:50.358830: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory
+2023-05-31 23:19:50.358840: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+_____________________ TestMainLocal.test_route_preprocess ______________________
+
+self = <tests.train_at_scale.test_main_local.TestMainLocal object at 0x7f393e2a8580>
+fixture_query_1k =      fare_amount           pickup_datetime  ...  dropoff_latitude  passenger_count
+0            8.9 2009-01-15 09:22:3...           4
+454          8.5 2014-12-27 16:47:42+00:00  ...         40.771263                4
+
+[455 rows x 7 columns]
+fixture_processed_1k =            0    1    2    3    4    5   ...   60   61   62   63   64         65
+0    0.000000  0.0  0.0  0.0  1.0  0.0...0.0   6.500000
+446  0.428571  0.0  0.0  0.0  0.0  0.0  ...  0.0  0.0  0.0  0.0  0.0   8.500000
+
+[447 rows x 66 columns]
+
+    def test_route_preprocess(self, fixture_query_1k: pd.DataFrame, fixture_processed_1k: pd.DataFrame):
+        from taxifare.interface.main_local import preprocess
+    
+        data_query_path = Path(LOCAL_DATA_PATH).joinpath("raw",f"query_{MIN_DATE}_{MAX_DATE}_{DATA_SIZE}.csv")
+        data_processed_path = Path(LOCAL_DATA_PATH).joinpath("processed",f"processed_{MIN_DATE}_{MAX_DATE}_{DATA_SIZE}.csv")
+    
+        data_query_exists = data_query_path.is_file()
+        data_processed_exists = data_processed_path.is_file()
+    
+        # SETUP
+        if data_query_exists:
+            shutil.copyfile(data_query_path, f'{data_query_path}_backup')
+            data_query_path.unlink()
+        if data_processed_exists:
+            shutil.copyfile(data_processed_path, f'{data_processed_path}_backup')
+            data_processed_path.unlink()
+    
+        # ACT
+        # Check route runs querying Big Query
+>       preprocess(min_date=MIN_DATE, max_date=MAX_DATE)
+
+tests/train_at_scale/test_main_local.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+taxifare/interface/main_local.py:167: in preprocess
+    query_job = client.query(query)
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/client.py:3403: in query
+    return _job_helpers.query_jobs_insert(
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/_job_helpers.py:114: in query_jobs_insert
+    future = do_query()
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/_job_helpers.py:91: in do_query
+    query_job._begin(retry=retry, timeout=timeout)
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/job/query.py:1310: in _begin
+    super(QueryJob, self)._begin(client=client, retry=retry, timeout=timeout)
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/job/base.py:693: in _begin
+    api_response = client._call_api(
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/bigquery/client.py:813: in _call_api
+    return call()
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/api_core/retry.py:349: in retry_wrapped_func
+    return retry_target(
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/api_core/retry.py:191: in retry_target
+    return target()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <google.cloud.bigquery._http.Connection object at 0x7f38d70f71c0>
+method = 'POST', path = '/projects/<your project id>/jobs', query_params = None
+data = '{"jobReference": {"jobId": "03db4fda-819f-4759-b55e-5412e31833d8", "projectId": "<your project id>"}, "configuration"...     WHERE pickup_datetime BETWEEN \'2009-01-01\' AND \'2015-01-01\'\\n        ORDER BY pickup_datetime\\n        "}}}'
+content_type = 'application/json', headers = None, api_base_url = None
+api_version = None, expect_json = True, _target_object = None, timeout = None
+extra_api_info = None
+
+    def api_request(
+        self,
+        method,
+        path,
+        query_params=None,
+        data=None,
+        content_type=None,
+        headers=None,
+        api_base_url=None,
+        api_version=None,
+        expect_json=True,
+        _target_object=None,
+        timeout=_DEFAULT_TIMEOUT,
+        extra_api_info=None,
+    ):
+        """Make a request over the HTTP transport to the API.
+    
+        You shouldn't need to use this method, but if you plan to
+        interact with the API using these primitives, this is the
+        correct one to use.
+    
+        :type method: str
+        :param method: The HTTP method name (ie, ``GET``, ``POST``, etc).
+                       Required.
+    
+        :type path: str
+        :param path: The path to the resource (ie, ``'/b/bucket-name'``).
+                     Required.
+    
+        :type query_params: dict or list
+        :param query_params: A dictionary of keys and values (or list of
+                             key-value pairs) to insert into the query
+                             string of the URL.
+    
+        :type data: str
+        :param data: The data to send as the body of the request. Default is
+                     the empty string.
+    
+        :type content_type: str
+        :param content_type: The proper MIME type of the data provided. Default
+                             is None.
+    
+        :type headers: dict
+        :param headers: extra HTTP headers to be sent with the request.
+    
+        :type api_base_url: str
+        :param api_base_url: The base URL for the API endpoint.
+                             Typically you won't have to provide this.
+                             Default is the standard API base URL.
+    
+        :type api_version: str
+        :param api_version: The version of the API to call.  Typically
+                            you shouldn't provide this and instead use
+                            the default for the library.  Default is the
+                            latest API version supported by
+                            google-cloud-python.
+    
+        :type expect_json: bool
+        :param expect_json: If True, this method will try to parse the
+                            response as JSON and raise an exception if
+                            that cannot be done.  Default is True.
+    
+        :type _target_object: :class:`object`
+        :param _target_object:
+            (Optional) Protected argument to be used by library callers. This
+            can allow custom behavior, for example, to defer an HTTP request
+            and complete initialization of the object at a later time.
+    
+        :type timeout: float or tuple
+        :param timeout: (optional) The amount of time, in seconds, to wait
+            for the server response.
+    
+            Can also be passed as a tuple (connect_timeout, read_timeout).
+            See :meth:`requests.Session.request` documentation for details.
+    
+        :type extra_api_info: string
+        :param extra_api_info: (optional) Extra api info to be appended to
+            the X-Goog-API-Client header
+    
+        :raises ~google.cloud.exceptions.GoogleCloudError: if the response code
+            is not 200 OK.
+        :raises ValueError: if the response content type is not JSON.
+        :rtype: dict or str
+        :returns: The API response payload, either as a raw string or
+                  a dictionary if the response is valid JSON.
+        """
+        url = self.build_api_url(
+            path=path,
+            query_params=query_params,
+            api_base_url=api_base_url,
+            api_version=api_version,
+        )
+    
+        # Making the executive decision that any dictionary
+        # data will be sent properly as JSON.
+        if data and isinstance(data, dict):
+            data = json.dumps(data)
+            content_type = "application/json"
+    
+        response = self._make_request(
+            method=method,
+            url=url,
+            data=data,
+            content_type=content_type,
+            headers=headers,
+            target_object=_target_object,
+            timeout=timeout,
+            extra_api_info=extra_api_info,
+        )
+    
+        if not 200 <= response.status_code < 300:
+>           raise exceptions.from_http_response(response)
+E           google.api_core.exceptions.BadRequest: 400 POST https://bigquery.googleapis.com/bigquery/v2/projects/%3Cyour%20project%20id%3E/jobs?prettyPrint=false: ProjectId and DatasetId must be non-empty
+E           
+E           Location: None
+E           Job ID: 03db4fda-819f-4759-b55e-5412e31833d8
+
+../../../.pyenv/versions/3.8.12/envs/taxifare-env/lib/python3.8/site-packages/google/cloud/_http/__init__.py:494: BadRequest
+----------------------------- Captured stdout call -----------------------------
+[35m
+ ⭐️ Use case: preprocess by batch[0m
+Get a DataFrame iterable from querying the BigQuery server...
+=========================== short test summary info ============================
+FAILED tests/train_at_scale/test_main_local.py::TestMainLocal::test_route_preprocess_and_train
+FAILED tests/train_at_scale/test_main_local.py::TestMainLocal::test_route_preprocess
+========================= 2 failed, 6 passed in 10.53s =========================
